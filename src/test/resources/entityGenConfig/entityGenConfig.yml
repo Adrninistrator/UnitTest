@@ -1,0 +1,16 @@
+# 连接MySQL数据库需要的驱动
+jdbcSettings:
+  url: "jdbc:mysql://127.0.0.1:3306/testdb?useunicode=true&characterEncoding=utf8&allowMultiQueries=true&useAffectedRows=true"
+  username: "test"
+  password: "123456"
+  driverClassName: "com.mysql.jdbc.Driver"
+
+# 需要指定为绝对路径，否则可能生成到[GRADLE_USER_HOME环境变量目录]\daemon\[Gradle版本号]
+outputDirectory: "E:/git-dir/pri-code/UnitTest/src/test/java"
+
+packageName: "test_jpa.entity"
+
+tableScanMode: 'RuleBased'
+
+tableScanRules:
+  - tableNames: ["test_.*"]

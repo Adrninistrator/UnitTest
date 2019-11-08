@@ -1,0 +1,134 @@
+apply plugin: 'eclipse'
+apply plugin: 'java'
+
+version = "0.1"
+description = "UnitTest"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def defaultEncoding = 'UTF-8'
+
+[compileJava, compileTestJava]*.options*.encoding = defaultEncoding
+
+configurations {
+
+    implementation.exclude module: 'slf4j-log4j12'
+    implementation.exclude module: 'log4j'
+    implementation.exclude module: 'commons-logging'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+}
+
+clean {
+    delete 'dist'
+    delete 'build'
+}
+
+task createProject {
+    sourceSets*.java.srcDirs*.each { it.mkdirs() }
+    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}
+
+def spring_version = "4.3.16.RELEASE"
+List spring = [
+        "org.springframework:spring-aop:$spring_version",
+        "org.springframework:spring-aspects:$spring_version",
+        "org.springframework:spring-beans:$spring_version",
+        "org.springframework:spring-context:$spring_version",
+        "org.springframework:spring-context-support:$spring_version",
+        "org.springframework:spring-core:$spring_version",
+        "org.springframework:spring-jdbc:$spring_version",
+        "org.springframework:spring-orm:$spring_version",
+        "org.springframework:spring-test:$spring_version",
+        "org.springframework:spring-tx:$spring_version"
+]
+
+List druid = ["com.alibaba:druid:1.0.9"]
+
+List mybatis = [
+        "org.mybatis:mybatis:3.2.8",
+        "org.mybatis:mybatis-spring:1.2.2"
+]
+
+List mysql = ["mysql:mysql-connector-java:5.1.32"]
+
+List logger = [
+        "org.apache.logging.log4j:log4j-api:2.11.1",
+        "org.apache.logging.log4j:log4j-core:2.11.1",
+        "org.apache.logging.log4j:log4j-slf4j-impl:2.11.1",
+        "org.slf4j:jcl-over-slf4j:1.7.28"
+]
+
+List junit = ["junit:junit:4.12"]
+
+//        "org.powermock:powermock-module-junit4:1.6.6",
+//        "org.powermock:powermock-api-mockito:1.6.6"
+
+//        "org.powermock:powermock-module-junit4:1.7.3",
+//        "org.powermock:powermock-api-mockito2:1.7.3"
+
+List powermock = [
+        "org.powermock:powermock-module-junit4:2.0.2",
+        "org.powermock:powermock-api-mockito2:2.0.2"
+]
+
+List mockito = [
+        "org.mockito:mockito-core:3.1.0"
+]
+
+List h2database = ["com.h2database:h2:1.4.199"]
+
+List lombok = ["org.projectlombok:lombok:1.18.2"]
+
+List hibernate = [
+        "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final",
+        "org.hibernate:hibernate-entitymanager:5.4.4.Final",
+]
+
+dependencies {
+    implementation spring, druid, mybatis, mysql, logger
+    testImplementation junit, powermock, mockito, h2database, lombok, hibernate
+}
+
+compileJava.dependsOn clean
+compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+
+// jpa-entity-generator配置
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.smartnews:jpa-entity-generator:0.99.8'
+        //连接MySQL数据库需要的驱动
+        classpath 'mysql:mysql-connector-java:5.1.32'
+    }
+}
+
+apply from: 'unittest.gradle'

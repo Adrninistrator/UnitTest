@@ -1,0 +1,133 @@
+// 单元测试配置
+test {
+
+    // 包含特定参数时，执行单元测试时只执行指定的类
+    if (project.hasProperty('use_h2') || project.hasProperty('use_h2_jpa') || project.hasProperty('use_mysql_jpa')) {
+
+        println("test testdatabase")
+
+        include 'test/testdatabase/**', 'test/testmock/mybatis/**'
+    } else if (project.hasProperty('fast')) {
+
+        println("test spy_member")
+
+        include 'test/testmock/spring/spy_member/**'
+    } else if (project.hasProperty('suite')) {
+
+        println("test suite")
+
+        include '**/TestSuite**'
+    } else if (project.hasProperty('spring')) {
+
+        println("test spring")
+
+        include 'test/testframework/spring/test/**'
+    } else {
+
+        println("test all")
+
+        include '**'
+        exclude 'test/testdatabase/**', 'test/testmock/mybatis/**', '**/TestSuite**'
+    }
+
+    minHeapSize = "256m"
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 5
+    jvmArgs "-XX:MaxMetaspaceSize=256m"
+
+    // 日志配置
+    testLogging {
+        events "PASSED", "STARTED", "FAILED", "SKIPPED"
+    }
+
+    //默认在build/reports目录生成报告
+//    reports {
+//        junitXml.enabled = false
+//        html.enabled = true
+//        html.destination = file("$buildDir/report")
+//    }
+
+}
+
+//设置单元测试配置文件的使用（对main.resources配置文件拷贝进行了限制时可能需要进行以下处理）
+processTestResources {
+    from(sourceSets.main.resources) {
+        include '*.xml', '*.properties'
+        exclude 'log4j2.xml'
+    }
+
+    from(sourceSets.test.resources) {
+        include '*'
+    }
+}
+
+// 在testClasses任务中可对配置文件进行替换
+testClasses {
+
+    doFirst {
+
+        // 包含特定参数时，执行测试前对配置文件进行替换，先拷贝文件再重命名
+        if (project.hasProperty('use_h2')) {
+
+            println("use h2")
+
+            copy {
+                from file('src/test/resources/base_h2.properties')
+                into file('build/resources/test/')
+
+                rename 'base_h2.properties', 'base.properties'
+            }
+        } else if (project.hasProperty('use_h2_jpa')) {
+
+            println("use h2 jpa")
+
+            copy {
+                from file('src/test/resources/base_h2_jpa.properties'), file('src/test/resources/applicationContext_jpa.xml')
+                into file('build/resources/test/')
+
+                rename 'base_h2_jpa.properties', 'base.properties'
+                rename 'applicationContext_jpa.xml', 'applicationContext.xml'
+            }
+        } else if (project.hasProperty('use_mysql_jpa')) {
+
+            println("use MySQL jpa")
+
+            copy {
+                from file('src/test/resources/base_MySQL.properties'), file('src/test/resources/applicationContext_jpa.xml')
+                into file('build/resources/test/')
+
+                rename 'base_MySQL.properties', 'base.properties'
+                rename 'applicationContext_jpa.xml', 'applicationContext.xml'
+            }
+        } else {
+            println("use MockDriver")
+        }
+    }
+}
+
+// jacoco配置
+apply plugin: 'jacoco'
+jacocoTestReport {
+
+    if (project.hasProperty('fast')) {
+        // 指定需要输出代码覆盖率报告的类路径
+        afterEvaluate {
+            classDirectories = files(classDirectories.files.collect {
+                fileTree(dir: it, include: 'com/test/service/**', exclude: '**/TestPrivateNonVoidService1**')
+            })
+        }
+    }
+
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+// jpa-entity-generator中生成jpa entity的命令
+apply plugin: 'entitygen'
+entityGen {
+    configPath = 'src/test/resources/entityGenConfig/entityGenConfig.yml'
+}
