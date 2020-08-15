@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.adrninistrator.dao.TestTableMapper">
+  <resultMap id="BaseResultMap" type="com.adrninistrator.dao.entity.TestTableEntity">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="flag" jdbcType="VARCHAR" property="flag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, flag, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from test_table
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from test_table
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    insert into test_table (id, flag, create_time, 
+      update_time)
+    values (#{id,jdbcType=VARCHAR}, #{flag,jdbcType=VARCHAR}, now(), now())
+  </insert>
+  <insert id="insertSelective" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    insert into test_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="flag != null">
+        flag,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null">
+        #{flag,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        now(),
+      </if>
+      <if test="updateTime != null">
+        now(),
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    update test_table
+    <set>
+      <if test="flag != null">
+        flag = #{flag,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    update test_table
+    set flag = #{flag,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+
+
+  <select id="selectRecord" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from test_table
+    where id = #{id1,jdbcType=VARCHAR}
+      or id = #{id2,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insertIgnore" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    insert ignore into test_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="flag != null">
+        flag,
+      </if>
+      create_time,
+      update_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null">
+        #{flag,jdbcType=VARCHAR},
+      </if>
+      now(),
+      now()
+    </trim>
+  </insert>
+
+  <insert id="insertIgnoreBatch" parameterType="java.util.List">
+    insert ignore into test_table (id, flag, create_time, update_time)
+    values
+    <foreach collection ="list" item= "item" index="index" separator=",">
+      (#{item.id,jdbcType=VARCHAR}, #{item.flag,jdbcType=VARCHAR}, now(), now())
+    </foreach>
+  </insert>
+
+  <insert id="insertOrUpdate" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    insert into test_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="flag != null">
+        flag,
+      </if>
+      create_time,
+      update_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null">
+        #{flag,jdbcType=VARCHAR},
+      </if>
+      now(),
+      now()
+    </trim>
+    on duplicate key update
+    <if test="flag != null">
+      flag = #{flag,jdbcType=VARCHAR}
+    </if>
+  </insert>
+
+  <insert id="insertOrUpdateBatch" parameterType="java.util.List">
+    insert into test_table (id, flag, create_time, update_time)
+    values
+    <foreach collection ="list" item= "item" index="index" separator=",">
+      (#{item.id,jdbcType=VARCHAR}, #{item.flag,jdbcType=VARCHAR}, now(), now())
+    </foreach>
+    on duplicate key update
+      flag = values(flag)
+  </insert>
+
+
+  <insert id="replaceInto" parameterType="com.adrninistrator.dao.entity.TestTableEntity">
+    replace into test_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="flag != null">
+        flag,
+      </if>
+      create_time,
+      update_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null">
+        #{flag,jdbcType=VARCHAR},
+      </if>
+      #{createTime,jdbcType=TIMESTAMP},
+      #{updateTime,jdbcType=TIMESTAMP}
+    </trim>
+  </insert>
+
+  <insert id="replaceIntoBatch" parameterType="java.util.List">
+    replace into test_table (id, flag, create_time, update_time)
+    values
+    <foreach collection ="list" item= "item" index="index" separator=",">
+      (
+        #{item.id,jdbcType=VARCHAR},
+        #{item.flag,jdbcType=VARCHAR},
+        #{item.createTime,jdbcType=TIMESTAMP},
+        #{item.updateTime,jdbcType=TIMESTAMP}
+      )
+    </foreach>
+  </insert>
+
+</mapper>

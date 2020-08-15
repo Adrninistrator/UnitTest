@@ -4,14 +4,23 @@
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} {%t} %-5p %c{1}.%M(%F:%L)  - %m%n"/>
         </Console>
-
     </Appenders>
     <Loggers>
         <Logger name="org.springframework.test.context.cache" level="DEBUG" additivity="false">
             <AppenderRef ref="console"/>
         </Logger>
 
-        <Logger name="org.springframework" level="INFO" additivity="false"/>
+        <Logger name="org.springframework" level="INFO" additivity="false">
+            <AppenderRef ref="console" />
+        </Logger>
+
+        <Logger name="org.apache.ibatis.logging.jdbc" level="debug" additivity="false">
+            <AppenderRef ref="console" />
+        </Logger>
+
+        <Logger name="com.adrninistrator.dao" level="debug" additivity="false">
+            <AppenderRef ref="console" />
+        </Logger>
 
         <Root level="info">
             <AppenderRef ref="console"/>

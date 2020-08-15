@@ -1,133 +1,156 @@
-// 单元测试配置
-test {
-
-    // 包含特定参数时，执行单元测试时只执行指定的类
-    if (project.hasProperty('use_h2') || project.hasProperty('use_h2_jpa') || project.hasProperty('use_mysql_jpa')) {
-
-        println("test testdatabase")
-
-        include 'test/testdatabase/**', 'test/testmock/mybatis/**'
-    } else if (project.hasProperty('fast')) {
-
-        println("test spy_member")
-
-        include 'test/testmock/spring/spy_member/**'
-    } else if (project.hasProperty('suite')) {
-
-        println("test suite")
-
-        include '**/TestSuite**'
-    } else if (project.hasProperty('spring')) {
-
-        println("test spring")
-
-        include 'test/testframework/spring/test/**'
-    } else {
-
-        println("test all")
-
-        include '**'
-        exclude 'test/testdatabase/**', 'test/testmock/mybatis/**', '**/TestSuite**'
-    }
-
-    minHeapSize = "256m"
-    maxHeapSize = "1g"
-    maxParallelForks = 1
-    forkEvery = 5
-    jvmArgs "-XX:MaxMetaspaceSize=256m"
-
-    // 日志配置
-    testLogging {
-        events "PASSED", "STARTED", "FAILED", "SKIPPED"
-    }
-
-    //默认在build/reports目录生成报告
-//    reports {
-//        junitXml.enabled = false
-//        html.enabled = true
-//        html.destination = file("$buildDir/report")
-//    }
-
-}
-
-//设置单元测试配置文件的使用（对main.resources配置文件拷贝进行了限制时可能需要进行以下处理）
-processTestResources {
-    from(sourceSets.main.resources) {
-        include '*.xml', '*.properties'
-        exclude 'log4j2.xml'
-    }
-
-    from(sourceSets.test.resources) {
-        include '*'
-    }
-}
-
-// 在testClasses任务中可对配置文件进行替换
-testClasses {
-
-    doFirst {
-
-        // 包含特定参数时，执行测试前对配置文件进行替换，先拷贝文件再重命名
-        if (project.hasProperty('use_h2')) {
-
-            println("use h2")
-
-            copy {
-                from file('src/test/resources/base_h2.properties')
-                into file('build/resources/test/')
-
-                rename 'base_h2.properties', 'base.properties'
-            }
-        } else if (project.hasProperty('use_h2_jpa')) {
-
-            println("use h2 jpa")
-
-            copy {
-                from file('src/test/resources/base_h2_jpa.properties'), file('src/test/resources/applicationContext_jpa.xml')
-                into file('build/resources/test/')
-
-                rename 'base_h2_jpa.properties', 'base.properties'
-                rename 'applicationContext_jpa.xml', 'applicationContext.xml'
-            }
-        } else if (project.hasProperty('use_mysql_jpa')) {
-
-            println("use MySQL jpa")
-
-            copy {
-                from file('src/test/resources/base_MySQL.properties'), file('src/test/resources/applicationContext_jpa.xml')
-                into file('build/resources/test/')
-
-                rename 'base_MySQL.properties', 'base.properties'
-                rename 'applicationContext_jpa.xml', 'applicationContext.xml'
-            }
-        } else {
-            println("use MockDriver")
-        }
-    }
-}
-
-// jacoco配置
+// jacoco插件
 apply plugin: 'jacoco'
-jacocoTestReport {
+// jpa-entity-generator-enhance中生成JPA Entity的插件
+apply plugin: 'entitygen'
 
-    if (project.hasProperty('fast')) {
-        // 指定需要输出代码覆盖率报告的类路径
-        afterEvaluate {
-            classDirectories = files(classDirectories.files.collect {
-                fileTree(dir: it, include: 'com/test/service/**', exclude: '**/TestPrivateNonVoidService1**')
-            })
+// 单元测试配置
+ext {
+    // 单元测试配置文件路径
+    testConfigFilePath = "src/test/resources/groovyConfig/unit_test_config.groovy"
+    // 获取测试模式的参数Key
+    testModeKey = "testMode"
+    // 获取测试模式
+    testMode = System.getProperty(testModeKey, "default_mode")
+
+    configSlurper = new ConfigSlurper()
+    configSlurper.registerConditionalBlock("test_mode", testMode)
+    // 当前使用的测试参数
+    configObject = configSlurper.parse(file(testConfigFilePath).toURI().toURL())
+}
+
+test {
+    doFirst {
+        // 设置测试范围
+        def testInclude = configObject.get("test_include")
+        if (testInclude != null) {
+            setIncludes(testInclude)
         }
+
+        // 设置排除的测试范围
+        def testExclude = configObject.get("test_exclude")
+        if (testExclude != null) {
+            setExcludes(testExclude)
+        }
+
+        minHeapSize = "256m"
+        maxHeapSize = "1g"
+
+        // 指定同时执行的测试类数量，默认为1
+        maxParallelForks = 1
+
+        /*
+            指定Gradle每个测试进程执行多少个测试类，超过该值后会创建新的进程
+            默认值为0，即一直使用一个进程执行测试类
+        */
+        forkEvery = 5
+
+        jvmArgs "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m"
+
+        // 日志配置
+        testLogging {
+            // 指定需要记录日志的事件
+            events "PASSED", "STARTED", "FAILED", "SKIPPED"
+        }
+    }
+}
+
+processResources {
+    setDuplicatesStrategy(DuplicatesStrategy.INCLUDE)
+
+    if (gradleArgsContains("build", "jar", "war")) {
+        include 'com/**'
+    }
+}
+
+// 在processTestResources任务中可对配置文件内容进行替换
+processTestResources {
+    setDuplicatesStrategy(DuplicatesStrategy.INCLUDE)
+
+    // 当Gradle执行参数包含test时，执行后续操作
+    if (gradleArgsContains("test")) {
+        if (configObject == null) {
+            println "Unsupported test mode: " + testMode
+            throw new RuntimeException("Unsupported test mode: " + testMode)
+        }
+
+        println "testMode: " + testMode
+        println "test configObject: " + configObject
+
+        //替换配置文件中的测试参数
+        from(sourceSets.test.resources) {
+            include "applicationContext_replace.xml", "base_replace.properties"
+            filter(org.apache.tools.ant.filters.ReplaceTokens, "tokens": configObject.toProperties())
+        }
+    }
+
+    doLast {
+        // 使用替换参数后的配置文件进行覆盖
+        file('build/resources/test/base.properties').renameTo(file('build/resources/test/base.properties.bak'))
+        file('build/resources/test/base_replace.properties').renameTo(file('build/resources/test/base.properties'))
+        file('build/resources/test/applicationContext.xml').renameTo(file('build/resources/test/applicationContext.xml.bak'))
+        file('build/resources/test/applicationContext_replace.xml').renameTo(file('build/resources/test/applicationContext.xml'))
+    }
+}
+
+jacocoTestReport {
+    // 当Gradle执行参数包含jacocoTestReport时，执行后续操作
+    if (gradleArgsContains(getName())) {
+        def jacocoInclude = configObject.get("jacoco_include")
+        def jacocoExclude = configObject.get("jacoco_exclude")
+
+        // 指定需要输出jacoco代码覆盖率报告的类范围
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree('dir': it,
+                    'include': jacocoInclude,
+                    'exclude': jacocoExclude)
+        }))
     }
 
     reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination file("${buildDir}/jacocoHtml")
+        xml.enabled = false
+        csv.enabled = false
+        html.enabled = true
+        html.destination = file("${buildDir}/jacocoReport")
     }
 }
 
-// jpa-entity-generator中生成jpa entity的命令
-apply plugin: 'entitygen'
+// jpa-entity-generator-enhance中生成JPA Entity的配置
 entityGen {
     configPath = 'src/test/resources/entityGenConfig/entityGenConfig.yml'
+}
+
+//显示支持的测试模式
+task showTestMode {
+    doFirst {
+        ConfigObject allConfigObject = new ConfigSlurper().parse(file(testConfigFilePath).toURI().toURL()).get("test_mode")
+
+        println "Usage:"
+
+        for (Map.Entry entry : allConfigObject.entrySet()) {
+            println "gradlew test -D" + testModeKey + "=" + entry.getKey()
+        }
+    }
+}
+
+// 判断Gradle执行的任务是否包含指定任务
+boolean gradleArgsContains(String... expectedArgs) {
+    StartParameter startParameter = gradle.getStartParameter()
+
+    if (startParameter.isDryRun()) {
+        return false
+    }
+
+    List<TaskExecutionRequest> taskExecutionRequestList = startParameter.getTaskRequests()
+    for (TaskExecutionRequest taskExecutionRequest : taskExecutionRequestList) {
+        List<String> args = taskExecutionRequest.getArgs()
+        for (String arg : args) {
+            for (String expectedArg : expectedArgs) {
+                if (arg.equals(expectedArg)) {
+                    return true
+                }
+            }
+        }
+    }
+
+    return false
 }

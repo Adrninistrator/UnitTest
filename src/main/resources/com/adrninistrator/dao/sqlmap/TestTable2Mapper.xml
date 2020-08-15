@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.adrninistrator.dao.TestTable2Mapper">
+  <resultMap id="BaseResultMap" type="com.adrninistrator.dao.entity.TestTable2">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="char1" jdbcType="CHAR" property="char1" />
+    <result column="char2" jdbcType="CHAR" property="char2" />
+    <result column="text2" jdbcType="VARCHAR" property="text2" />
+    <result column="int_1" jdbcType="INTEGER" property="int1" />
+    <result column="int_2" jdbcType="INTEGER" property="int2" />
+    <result column="decimal1" jdbcType="DECIMAL" property="decimal1" />
+    <result column="decimal2" jdbcType="DECIMAL" property="decimal2" />
+    <result column="datetime1" jdbcType="TIMESTAMP" property="datetime1" />
+    <result column="datetime2" jdbcType="TIMESTAMP" property="datetime2" />
+    <result column="timestamp1" jdbcType="TIMESTAMP" property="timestamp1" />
+    <result column="timestamp2" jdbcType="TIMESTAMP" property="timestamp2" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.adrninistrator.dao.entity.TestTable2WithBLOBs">
+    <result column="blob1" jdbcType="LONGVARBINARY" property="blob1" />
+    <result column="blob2" jdbcType="BINARY" property="blob2" />
+    <result column="text1" jdbcType="LONGVARCHAR" property="text1" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, char1, char2, text2, int_1, int_2, decimal1, decimal2, datetime1, datetime2, 
+    timestamp1, timestamp2
+  </sql>
+  <sql id="Blob_Column_List">
+    blob1, blob2, text1
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from test_table2
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from test_table2
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.adrninistrator.dao.entity.TestTable2WithBLOBs">
+    insert into test_table2 (id, char1, char2, text2, 
+      int_1, int_2, decimal1, 
+      decimal2, datetime1, datetime2, 
+      timestamp1, timestamp2, blob1, 
+      blob2, text1)
+    values (#{id,jdbcType=VARCHAR}, #{char1,jdbcType=CHAR}, #{char2,jdbcType=CHAR}, #{text2,jdbcType=VARCHAR}, 
+      #{int1,jdbcType=INTEGER}, #{int2,jdbcType=INTEGER}, #{decimal1,jdbcType=DECIMAL}, 
+      #{decimal2,jdbcType=DECIMAL}, #{datetime1,jdbcType=TIMESTAMP}, #{datetime2,jdbcType=TIMESTAMP}, 
+      #{timestamp1,jdbcType=TIMESTAMP}, #{timestamp2,jdbcType=TIMESTAMP}, #{blob1,jdbcType=LONGVARBINARY}, 
+      #{blob2,jdbcType=BINARY}, #{text1,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.adrninistrator.dao.entity.TestTable2WithBLOBs">
+    insert into test_table2
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="char1 != null">
+        char1,
+      </if>
+      <if test="char2 != null">
+        char2,
+      </if>
+      <if test="text2 != null">
+        text2,
+      </if>
+      <if test="int1 != null">
+        int_1,
+      </if>
+      <if test="int2 != null">
+        int_2,
+      </if>
+      <if test="decimal1 != null">
+        decimal1,
+      </if>
+      <if test="decimal2 != null">
+        decimal2,
+      </if>
+      <if test="datetime1 != null">
+        datetime1,
+      </if>
+      <if test="datetime2 != null">
+        datetime2,
+      </if>
+      <if test="timestamp1 != null">
+        timestamp1,
+      </if>
+      <if test="timestamp2 != null">
+        timestamp2,
+      </if>
+      <if test="blob1 != null">
+        blob1,
+      </if>
+      <if test="blob2 != null">
+        blob2,
+      </if>
+      <if test="text1 != null">
+        text1,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="char1 != null">
+        #{char1,jdbcType=CHAR},
+      </if>
+      <if test="char2 != null">
+        #{char2,jdbcType=CHAR},
+      </if>
+      <if test="text2 != null">
+        #{text2,jdbcType=VARCHAR},
+      </if>
+      <if test="int1 != null">
+        #{int1,jdbcType=INTEGER},
+      </if>
+      <if test="int2 != null">
+        #{int2,jdbcType=INTEGER},
+      </if>
+      <if test="decimal1 != null">
+        #{decimal1,jdbcType=DECIMAL},
+      </if>
+      <if test="decimal2 != null">
+        #{decimal2,jdbcType=DECIMAL},
+      </if>
+      <if test="datetime1 != null">
+        #{datetime1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="datetime2 != null">
+        #{datetime2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="timestamp1 != null">
+        #{timestamp1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="timestamp2 != null">
+        #{timestamp2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="blob1 != null">
+        #{blob1,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="blob2 != null">
+        #{blob2,jdbcType=BINARY},
+      </if>
+      <if test="text1 != null">
+        #{text1,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.adrninistrator.dao.entity.TestTable2WithBLOBs">
+    update test_table2
+    <set>
+      <if test="char1 != null">
+        char1 = #{char1,jdbcType=CHAR},
+      </if>
+      <if test="char2 != null">
+        char2 = #{char2,jdbcType=CHAR},
+      </if>
+      <if test="text2 != null">
+        text2 = #{text2,jdbcType=VARCHAR},
+      </if>
+      <if test="int1 != null">
+        int_1 = #{int1,jdbcType=INTEGER},
+      </if>
+      <if test="int2 != null">
+        int_2 = #{int2,jdbcType=INTEGER},
+      </if>
+      <if test="decimal1 != null">
+        decimal1 = #{decimal1,jdbcType=DECIMAL},
+      </if>
+      <if test="decimal2 != null">
+        decimal2 = #{decimal2,jdbcType=DECIMAL},
+      </if>
+      <if test="datetime1 != null">
+        datetime1 = #{datetime1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="datetime2 != null">
+        datetime2 = #{datetime2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="timestamp1 != null">
+        timestamp1 = #{timestamp1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="timestamp2 != null">
+        timestamp2 = #{timestamp2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="blob1 != null">
+        blob1 = #{blob1,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="blob2 != null">
+        blob2 = #{blob2,jdbcType=BINARY},
+      </if>
+      <if test="text1 != null">
+        text1 = #{text1,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.adrninistrator.dao.entity.TestTable2WithBLOBs">
+    update test_table2
+    set char1 = #{char1,jdbcType=CHAR},
+      char2 = #{char2,jdbcType=CHAR},
+      text2 = #{text2,jdbcType=VARCHAR},
+      int_1 = #{int1,jdbcType=INTEGER},
+      int_2 = #{int2,jdbcType=INTEGER},
+      decimal1 = #{decimal1,jdbcType=DECIMAL},
+      decimal2 = #{decimal2,jdbcType=DECIMAL},
+      datetime1 = #{datetime1,jdbcType=TIMESTAMP},
+      datetime2 = #{datetime2,jdbcType=TIMESTAMP},
+      timestamp1 = #{timestamp1,jdbcType=TIMESTAMP},
+      timestamp2 = #{timestamp2,jdbcType=TIMESTAMP},
+      blob1 = #{blob1,jdbcType=LONGVARBINARY},
+      blob2 = #{blob2,jdbcType=BINARY},
+      text1 = #{text1,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.adrninistrator.dao.entity.TestTable2">
+    update test_table2
+    set char1 = #{char1,jdbcType=CHAR},
+      char2 = #{char2,jdbcType=CHAR},
+      text2 = #{text2,jdbcType=VARCHAR},
+      int_1 = #{int1,jdbcType=INTEGER},
+      int_2 = #{int2,jdbcType=INTEGER},
+      decimal1 = #{decimal1,jdbcType=DECIMAL},
+      decimal2 = #{decimal2,jdbcType=DECIMAL},
+      datetime1 = #{datetime1,jdbcType=TIMESTAMP},
+      datetime2 = #{datetime2,jdbcType=TIMESTAMP},
+      timestamp1 = #{timestamp1,jdbcType=TIMESTAMP},
+      timestamp2 = #{timestamp2,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

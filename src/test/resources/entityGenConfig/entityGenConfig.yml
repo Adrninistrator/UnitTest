@@ -1,16 +1,31 @@
-# 连接MySQL数据库需要的驱动
+# 连接数据库参数
 jdbcSettings:
   url: "jdbc:mysql://127.0.0.1:3306/testdb?useunicode=true&characterEncoding=utf8&allowMultiQueries=true&useAffectedRows=true"
   username: "test"
   password: "123456"
   driverClassName: "com.mysql.jdbc.Driver"
 
-# 需要指定为绝对路径，否则可能生成到[GRADLE_USER_HOME环境变量目录]\daemon\[Gradle版本号]
-outputDirectory: "E:/git-dir/pri-code/UnitTest/src/test/java"
+# 指定生成JPA Entity的目录，可使用绝对路径或相对路径
+outputDirectory: "src/test/java"
 
-packageName: "test_jpa.entity"
+# 指定生成JPA Entity的包名
+packageName: "adrninistrator.test_jpa.entity"
 
 tableScanMode: 'RuleBased'
 
+# 指定需要生成JPA Entity的数据库表名，支持正则表达式
 tableScanRules:
+#  - tableNames: ["test_table", "test_table2", "test_table3"]
+#  - tableNames: ["test_table[0-9]"]
+#  - tableNames: ["test_table[2]", "test_table[3]"]
   - tableNames: ["test_.*"]
+
+# 指定需要排除的JPA Entity的数据库表名，支持正则表达式
+#tableExclusionRules:
+#  - tableNames: ["test_table[0-9]"]
+
+# 指定是否需要修改类型
+modifyType: true
+
+# 修改类型的配置文件路径，可使用绝对路径或相对路径
+modifyTypePropertiesFile: "src/test/resources/entityGen/jpa_modify_type.properties"

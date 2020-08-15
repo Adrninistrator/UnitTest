@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- Spring JPA配置 -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <!-- 配置JPA使用的数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+
+        <!-- 配置JPA提供程序适配器，使用Hibernate -->
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+
+        <!-- 配置JPA Entity所在的包 -->
+        <property name="packagesToScan">
+            <array>
+                <value>adrninistrator.test_jpa.entity</value>
+                <value>adrninistrator.test_jpa.entity2</value>
+            </array>
+        </property>
+
+        <!-- 配置JPA属性 -->
+        <property name="jpaProperties">
+            <value>
+                # 自动创建或更新数据库表
+                hibernate.hbm2ddl.auto=update
+                # 打印SQL语句
+                hibernate.show_sql=true
+                hibernate.format_sql=true
+            </value>
+        </property>
+    </bean>
+</beans>

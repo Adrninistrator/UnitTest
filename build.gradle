@@ -2,7 +2,8 @@ apply plugin: 'eclipse'
 apply plugin: 'java'
 
 version = "0.1"
-description = "UnitTest"
+def projectName = "UnitTest"
+description = "${projectName}"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -16,6 +17,8 @@ configurations {
     implementation.exclude module: 'log4j'
     implementation.exclude module: 'commons-logging'
 }
+
+project.buildDir = 'build'
 
 repositories {
     mavenCentral()
@@ -43,17 +46,11 @@ sourceSets {
     }
 }
 
-clean {
-    delete 'dist'
-    delete 'build'
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
-task createProject {
-    sourceSets*.java.srcDirs*.each { it.mkdirs() }
-    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
-}
-
-def spring_version = "4.3.16.RELEASE"
+def spring_version = "4.3.26.RELEASE"
 List spring = [
         "org.springframework:spring-aop:$spring_version",
         "org.springframework:spring-aspects:$spring_version",
@@ -83,49 +80,47 @@ List logger = [
         "org.slf4j:jcl-over-slf4j:1.7.28"
 ]
 
-List junit = ["junit:junit:4.12"]
-
-//        "org.powermock:powermock-module-junit4:1.6.6",
-//        "org.powermock:powermock-api-mockito:1.6.6"
-
-//        "org.powermock:powermock-module-junit4:1.7.3",
-//        "org.powermock:powermock-api-mockito2:1.7.3"
+List junit = ["junit:junit:4.13"]
 
 List powermock = [
-        "org.powermock:powermock-module-junit4:2.0.2",
-        "org.powermock:powermock-api-mockito2:2.0.2"
+        "org.powermock:powermock-module-junit4:2.0.7",
+        "org.powermock:powermock-api-mockito2:2.0.7"
 ]
 
 List mockito = [
-        "org.mockito:mockito-core:3.1.0"
+        "org.mockito:mockito-core:3.4.6"
 ]
 
-List h2database = ["com.h2database:h2:1.4.199"]
+List h2database = ["com.h2database:h2:1.4.200"]
 
-List lombok = ["org.projectlombok:lombok:1.18.2"]
+List lombok = ["org.projectlombok:lombok:1.18.12"]
 
 List hibernate = [
-        "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final",
-        "org.hibernate:hibernate-entitymanager:5.4.4.Final",
+        "javax.persistence:javax.persistence-api:2.2",
+        "org.hibernate:hibernate-core:5.4.12.Final"
+]
+
+List jpa_entity_gen = [
+        "com.github.adrninistrator:jpa-entity-generator-enhance:0.0.1"
 ]
 
 dependencies {
     implementation spring, druid, mybatis, mysql, logger
-    testImplementation junit, powermock, mockito, h2database, lombok, hibernate
+    testImplementation junit, powermock, mockito, h2database, lombok, hibernate, jpa_entity_gen
+//    test模块中使用了Lombok
+    testAnnotationProcessor lombok
 }
 
 compileJava.dependsOn clean
-compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 
 // jpa-entity-generator配置
 buildscript {
-
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.smartnews:jpa-entity-generator:0.99.8'
+        classpath 'com.github.adrninistrator:jpa-entity-generator-enhance:0.0.1'
         //连接MySQL数据库需要的驱动
         classpath 'mysql:mysql-connector-java:5.1.32'
     }

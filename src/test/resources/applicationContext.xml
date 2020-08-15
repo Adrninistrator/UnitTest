@@ -4,26 +4,31 @@
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="
-        http://www.springframework.org/schema/aop   
-        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-4.0.xsd
         http://www.springframework.org/schema/tx
-        http://www.springframework.org/schema/tx/spring-tx.xsd"
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd"
        default-lazy-init="true">
 
     <!-- Activates annotation-based bean configuration -->
     <context:annotation-config/>
+
     <!-- Scans for application @Components to deploy -->
-    <context:component-scan base-package="com.test, test.testmock.spring.mock.delegatesto, test.testmock.mybatis.delegatesto">
+    <context:component-scan
+            base-package="com.adrninistrator, adrninistrator.test.testmock.spring.mock.delegatesto, adrninistrator.test.testmock.mybatis.delegatesto">
         <context:include-filter type="annotation" expression="org.aspectj.lang.annotation.Aspect"/>
     </context:component-scan>
 
     <!-- 指定proxy-target-class="true"，AOP使用CGLIB，不使用JDK动态代理 -->
-    <aop:aspectj-autoproxy proxy-target-class="false"/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
     <!-- 系统配置文件 -->
     <context:property-placeholder location="classpath:base.properties"/>
@@ -70,7 +75,7 @@
 
     <!-- dao配置 -->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.test.dao"/>
+        <property name="basePackage" value="com.adrninistrator.dao"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
 
@@ -82,7 +87,7 @@
     </bean>
 
     <!-- 测试Bean -->
-    <bean class="com.test.non_static.TestNonStatic2" id="testNonStatic2Bean">
+    <bean class="com.adrninistrator.non_static.TestNonStatic2" id="testNonStatic2Bean">
         <property name="flag" value="${testNonStatic2Bean.flag}"/>
     </bean>
 
@@ -99,4 +104,12 @@
         <property name="allowCoreThreadTimeOut" value="true"/>
     </bean>
 
+    <task:scheduler id="TestTimer" pool-size="1"/>
+    <task:scheduled-tasks scheduler="TestTimer">
+        <task:scheduled ref="com.adrninistrator.scheduler.TestScheduler" method="test" cron="*/10 * * * * *"/>
+    </task:scheduled-tasks>
+
+    <!-- 开启@Async，与@EnableAsync注解相同 -->
+    <!-- 指定proxy-target-class="true"，使用CGLIB，不使用JDK动态代理 -->
+    <task:annotation-driven executor="testThreadPoolTaskExecutor" proxy-target-class="true"/>
 </beans>
